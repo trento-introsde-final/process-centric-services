@@ -19,7 +19,7 @@
        xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
     <info
         organisation="introsde"
-        module="storage-services"
+        module="process-centric-services"
         status="integration">
 	</info>
 	
@@ -55,9 +55,6 @@
             <artifact name="jackson-jaxrs-base" type="jar"/>
         </dependency>
         
-        <dependency org="org.xerial" name="sqlite-jdbc" rev="3.7.2"/>
-        <dependency org="org.mongodb" name="mongo-java-driver" rev="2.12.3"/>
-        <dependency org="com.h2database" name="h2" rev="1.4.181"/>
         <dependency org="org.apache.derby" name="derby" rev="10.10.2.0"/>
         <dependency org="javax.ejb" name="javax.ejb-api" rev="3.2"/>
         <dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.1.0"/>
