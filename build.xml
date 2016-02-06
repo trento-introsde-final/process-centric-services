@@ -101,9 +101,9 @@
                 </fileset>
             </copy>
         </target>
-        <target name="run">
-            <echo message="app start App in ${build.dir}" />
-            <java classname="App" classpath="${build.dir}" fork="true">
+    	<target name="run">
+            <echo message="app start introsde.processcentric.soap.endpoint.IntroSDEPublisher in ${build.dir}" />
+            <java classname="introsde.processcentric.soap.endpoint.IntroSDEPublisher" classpath="${build.dir}" fork="true">
                 <arg value="$JAVA_OPTS  -cp" />
                 <classpath>
                     <path location="build" />
