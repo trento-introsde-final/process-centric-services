@@ -4,6 +4,7 @@ import introsde.processcentric.model.request.Goal;
 import introsde.processcentric.model.request.Run;
 import introsde.processcentric.model.response.GoalStatusResponseContainer;
 import introsde.processcentric.model.response.InternalCommunicationException;
+import introsde.processcentric.model.response.UpdateRunResponseContainer;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -27,7 +28,7 @@ public interface ProcessCentricServices {
 	
 	@WebMethod(operationName="updateRunInfo")
     @WebResult(name="person") 
-    public void updateRunInfo(@WebParam(name="slack_user_id") String slack_user_id, Run run);
+    public UpdateRunResponseContainer updateRunInfo(@WebParam(name="slack_user_id") String slack_user_id, Run run) throws InternalCommunicationException;
 	
 	@WebMethod(operationName="setGoal")
     @WebResult(name="person") 

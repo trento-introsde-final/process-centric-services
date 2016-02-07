@@ -18,9 +18,17 @@ public class Run {
 	private float max_speed;
 	
 	private float avg_speed;
+	
+	private int steps;
 
 	public Run(){
-		
+		distance = 0;
+		calories = 0;
+		moving_time = 0;
+		elevation_gain = 0;
+		max_speed = 0;
+		avg_speed = 0;
+		steps = 0;
 	}
 
 	public Timestamp getStart_date() {
@@ -51,6 +59,10 @@ public class Run {
 		return avg_speed;
 	}
 
+	public int getSteps() {
+		return steps;
+	}
+	
 	public void setStart_date(Timestamp start_date) {
 		this.start_date = start_date;
 	}
@@ -79,5 +91,7 @@ public class Run {
 		this.avg_speed = avg_speed;
 	}
 	
-	
+	public void setSteps(int steps){
+		this.steps = steps;
+	}
 }

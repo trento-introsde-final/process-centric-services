@@ -2,6 +2,7 @@ package introsde.processcentric.soap.endpoint;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Properties;
 
 import javax.xml.ws.Endpoint;
 
@@ -25,6 +26,10 @@ public class ProcessCentricPublisher {
         {
             hostname = "localhost";
         }
+        
+        Properties prop = System.getProperties();
+		System.out.println("java.class.path now = " + prop.getProperty("java.class.path", null));
+		System.out.println("DebugMessage");
 
         return "http://" + hostname + port + BASE_URL;        
     }

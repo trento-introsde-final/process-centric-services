@@ -11,12 +11,14 @@ import introsde.processcentric.model.request.Run;
 import introsde.processcentric.model.request.User;
 import introsde.processcentric.model.response.GoalStatusResponseContainer;
 import introsde.processcentric.model.response.InternalCommunicationException;
-import introsde.processcentric.model.response.InternalCommunicationExceptionBean;
+import introsde.processcentric.model.response.InternalServiceFault;
 import introsde.processcentric.model.response.Message;
+import introsde.processcentric.model.response.UpdateRunResponseContainer;
 import introsde.processcentric.util.UrlInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.jws.WebService;
 import javax.ws.rs.client.Client;
@@ -40,6 +42,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	String storageServicesURL;
 	
 	String URLUsers = "%s/users/%s";
+	String URLRuns = "%s/users/%s/runs";
 	String URLGoalStatus = "%s/users/%s/goal-status";
 	String URLSlackUser = "%s/user-id/%s";
 	String URLPictures = "%s/pretty-pic";
@@ -50,78 +53,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
     	businessServicesURL = u.getBusinessURL();
     	storageServicesURL = u.getStorageURL();
     }
-/*
-	@Override
-	public int initializeUser(String slack_user_id, String name) {
-		
-		try{
-			if(slack_user_id != null && !slack_user_id.isEmpty()){
-				DefaultHttpClient httpClient = new DefaultHttpClient();
-				HttpPost postRequest = new HttpPost(businessUrl+"users");
-				
-				StringEntity input = new StringEntity("{\"slack_user_id\": \"UB23324\"}");
-				input.setContentType("application/json");
-				postRequest.setEntity(input);
-				
-				
-				HttpResponse response = httpClient.execute(postRequest);
-				
-				System.out.println(response);
-				Header[] headers = response.getAllHeaders();
-				
-				for(Header h: headers) {
-					if(h.getName().equals("Location")){
-						location = h.getValue();
-					}
-				}
-				stringlocation = new URI(location);
-				String path = stringlocation.getPath();
-				String idStr = path.substring(path.lastIndexOf('/') + 1);
-				int id = Integer.parseInt(idStr);
-	
-				
-				if (response.getStatusLine().getStatusCode() == 400) {
-					BufferedReader rd = new BufferedReader(
-		                    new InputStreamReader(response.getEntity().getContent()));
-	
-					StringBuffer result = new StringBuffer();
-					String line = "";
-					while ((line = rd.readLine()) != null) {
-						result.append(line);
-					}
-					return 0;
-				} else if (response.getStatusLine().getStatusCode() == 404) {
-					BufferedReader rd = new BufferedReader(
-		                    new InputStreamReader(response.getEntity().getContent()));
-	
-					StringBuffer result = new StringBuffer();
-					String line = "";
-					while ((line = rd.readLine()) != null) {
-						result.append(line);
-					}
-					return 0;
-				} else {
-					BufferedReader rd = new BufferedReader(
-		                    new InputStreamReader(response.getEntity().getContent()));
-	
-					StringBuffer result = new StringBuffer();
-					String line = "";
-					while ((line = rd.readLine()) != null) {
-						result.append(line);
-					}
-					
-					httpClient.getConnectionManager().shutdown();
-					return id;
-				}
-			} else {
-				return 0;
-			}
-		} catch(Exception e){
-			System.out.println("Exception: " + e);
-			return 0;
-		}
-	}
-*/
+
 	/**
 	 * 
 	 * @param slack_user_id
@@ -139,7 +71,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		}
 		
 		//############################################
-		// Step 1: Check if already registered	
+		// Call 1: Check if already registered	
 		//###########################################
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
@@ -151,7 +83,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		}
 		
 		//############################################
-		// Step 2: Register user
+		// Call 2: Register user
 		//###########################################		
 		client = ClientBuilder.newClient();
 		webTarget = client.target(String.format(URLUsers, storageServicesURL, ""));
@@ -192,7 +124,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		}
 		
 		//############################################
-		// Step 1: Get user id, from slack_user_id
+		// Call 1: Get user id, from slack_user_id
 		//###########################################
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
@@ -202,7 +134,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		Integer user_id = slackIdResp.getId();
 		
 		//############################################
-		// Step 2: Get goal status for user
+		// Call 2: Get goal status for user
 		//###########################################
 		webTarget = client.target(String.format(URLGoalStatus, businessServicesURL, user_id.toString()));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
@@ -228,7 +160,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		}
 		
 		//#############################################
-		// Step 3: Get pretty picture
+		// Call 3: Get pretty picture
 		//############################################
 		webTarget = client.target(String.format(URLPictures, storageServicesURL));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
@@ -237,7 +169,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 
 		
 		//############################################
-		// Step 4: Get motivational quote
+		// Call 4: Get motivational quote
 		//############################################
 		webTarget = client.target(String.format(URLQuotes, storageServicesURL));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
@@ -258,9 +190,95 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	}
 
 	@Override
-	public void updateRunInfo(String slack_user_id, Run run) {
-		// TODO Auto-generated method stub
+	/**
+	 * 
+	 * @param slack_user_id
+	 * @param name
+	 * @return -1 Bad Params
+	 * 		   -2 Could not get user id 
+	 * 		   -3 User id does not exist
+	 * 		   -4 Could not get goal status
+	 * 		   -5 Could not save run
+	 *          0 Id of created run
+	 */
+	public UpdateRunResponseContainer updateRunInfo(String slack_user_id, Run run) throws InternalCommunicationException{
+		UpdateRunResponseContainer response = new UpdateRunResponseContainer();
+		if(slack_user_id == null || slack_user_id.isEmpty() || run == null){
+			//response.setError(-1, "Invalid arguments.");
+			return null;
+		}
 		
+		//############################################
+		// Call 1: Get user id, from slack_user_id
+		//###########################################
+		Client client = ClientBuilder.newClient();
+		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
+		Builder builder = webTarget.request(MediaType.APPLICATION_JSON);
+		Response res  = builder.get();
+		if(res.getStatus() != 200){
+			//response.setError(-2, "Cannot commuincate with ")
+		}
+		SlackIdResponse slackIdResp = res.readEntity(SlackIdResponse.class);
+		if(slackIdResp.getStatus().equals("ERROR")){
+			return null;
+		}
+		Integer user_id = slackIdResp.getId();
+		
+		//############################################
+		// Call 2: Check goals before Run is added
+		//###########################################
+		webTarget = client.target(String.format(URLGoalStatus, businessServicesURL, user_id.toString()));
+		builder = webTarget.request(MediaType.APPLICATION_JSON);
+		res = builder.get();
+		if(res.getStatus() != 200){
+			return null;
+		}
+		GoalStatusResponse gStatusResp = res.readEntity(GoalStatusResponse.class);
+		if(gStatusResp.getStatus().equals("ERROR")){
+			return null;
+		}
+		List<GoalStatusObject> goals = gStatusResp.getGoal_status();
+
+		//############################################
+		// Call 3: Save run
+		//###########################################
+		webTarget = client.target(String.format(URLGoalStatus, storageServicesURL, user_id.toString()));
+		builder = webTarget.request(MediaType.APPLICATION_JSON);
+		res = builder.post(Entity.json(run));
+		if(res.getStatus() != 201){
+			return null;
+		}
+		
+		//Check if any goal is met with run
+		List<GoalStatusObject> newlyMetGoals = checkNewGoalsMet(goals, run);
+		ArrayList<Message> messages = new ArrayList<Message>();
+		
+		if(!newlyMetGoals.isEmpty()){
+			messages.add(new Message("text", "Congratulations, you've achieved agoal."));
+			//############################################
+			// Call 4.A: Get rewards: Pretty pic
+			//###########################################
+			webTarget = client.target(String.format(URLPictures, storageServicesURL));
+			builder = webTarget.request(MediaType.APPLICATION_JSON);
+			res = builder.get();
+			PrettyPicResponse picResp = parseResponse(res, 200, PrettyPicResponse.class);
+			messages.add(new Message("image", picResp.getPicture().url));
+		} else {
+			//############################################
+			// Call 4: Get motivational quote
+			//############################################
+			webTarget = client.target(String.format(URLQuotes, storageServicesURL));
+			builder = webTarget.request(MediaType.APPLICATION_JSON);
+			res = builder.get();
+			MotivationQuoteResponse mQuoteResp = parseResponse(res, 200, MotivationQuoteResponse.class);
+			messages.add(new Message("quote", String.format("\"%s\" \n -%s", mQuoteResp.getResult().quote, mQuoteResp.getResult().author)));
+		}
+		
+		
+		//build response message 
+		UpdateRunResponseContainer updateRunResp = new UpdateRunResponseContainer();
+		updateRunResp.setMessages(messages);
+		return updateRunResp;
 	}
 
 	@Override
@@ -269,11 +287,50 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		
 	}
 
+	private List<GoalStatusObject> checkNewGoalsMet(List<GoalStatusObject> goalStatus, Run run){
+		ArrayList<GoalStatusObject> newlyMetGoals = new ArrayList<GoalStatusObject>();
+		for(GoalStatusObject g: goalStatus){
+			if(!g.getGoal_met().booleanValue()){
+				float missing = g.getTarget() - g.getCount();
+				float current = 0;
+				switch(g.getType()){
+				case "distance":
+					current = run.getDistance();
+					break;
+				case "calories":
+					current = run.getCalories();
+					break;
+				case "moving_time":
+					current = run.getMoving_time();
+					break;
+				case "elevation_gain":
+					current = run.getElevation_gain();
+					break;
+				case "max_speed":
+					current = run.getMax_speed();
+					break;
+				case "avg_speed":
+					current = run.getAvg_speed();
+					break;
+				case "steps":
+					current = run.getSteps();
+					break;
+				}
+				if(current > missing){
+					newlyMetGoals.add(g);
+				}
+			}
+		}
+		return newlyMetGoals;
+	}
+	
 	private <T extends BasicResponse> T parseResponse(
 			Response response, int expected, Class<T> classType) 
 					throws InternalCommunicationException{
 		int status = response.getStatus();
-		InternalCommunicationExceptionBean throwable = new InternalCommunicationExceptionBean();
+		InternalServiceFault throwable = new InternalServiceFault();
+		throwable.setFaultCode("1233");
+		throwable.setFaultString("Could not contact underlying servers.");
 		if(status == 500 || status == 503){
 			throw new InternalCommunicationException("Could not contact underlying servers. Got ERROR: "+status, throwable);
 		}
