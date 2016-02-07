@@ -29,7 +29,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	String businessServicesURL;
 	String storageServicesURL;
 	
-	String URLUsers = "%s/users/%";
+	String URLUsers = "%s/users/%s";
 	
 	public ProcessCentricImpl() {
     	UrlInfo u = new UrlInfo();
