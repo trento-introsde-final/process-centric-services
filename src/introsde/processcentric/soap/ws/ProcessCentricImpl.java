@@ -144,7 +144,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		System.out.println("Call2: "+res.getStatus());
 		GoalStatusResponse gStatusResp = parseResponse(res, 200, GoalStatusResponse.class);
 		List<GoalStatusObject> goals = gStatusResp.getGoal_status();
-		
+		System.out.println("Number of goals: "+goals.size());
 		//Count how many goals are met
 		int metGoals = 0;
 		int totGoals = goals.size();
@@ -153,6 +153,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 			if(g.getGoal_met())
 				metGoals++;
 		}
+		System.out.println("Met goals: "+metGoals);
 		if(totGoals == 0){
 			message = "You haven't set any goals yet. We are sad. Maybe this can get you going?";
 		} else if (totGoals == metGoals){
@@ -188,9 +189,11 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		messages.add(new Message("quote", 
 				String.format("\"%s\" \n -%s", mQuoteResp.getResult().quote, mQuoteResp.getResult().author)));
 		
+		
 		GoalStatusResponseContainer resp = new GoalStatusResponseContainer();
 		resp.setGoalStatusList(goals);
 		resp.setMessages(messages);
+		System.out.println(String.format("%d messages, %d goals", resp.getMessages().size(), resp.getGoalStatusList().size()));
 		return resp;
 	}
 
