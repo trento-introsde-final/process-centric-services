@@ -11,6 +11,7 @@ import introsde.processcentric.model.request.Run;
 import introsde.processcentric.model.request.User;
 import introsde.processcentric.model.response.GoalStatusResponseContainer;
 import introsde.processcentric.model.response.InternalCommunicationException;
+import introsde.processcentric.model.response.InternalCommunicationExceptionBean;
 import introsde.processcentric.model.response.Message;
 import introsde.processcentric.util.UrlInfo;
 
@@ -255,17 +256,18 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 			Response response, int expected, Class<T> classType) 
 					throws InternalCommunicationException{
 		int status = response.getStatus();
+		InternalCommunicationExceptionBean throwable = new InternalCommunicationExceptionBean();
 		if(status == 500 || status == 503){
-			throw new InternalCommunicationException("Could not contact underlying servers. Got ERROR: "+status);
+			throw new InternalCommunicationException("Could not contact underlying servers. Got ERROR: "+status, throwable);
 		}
 		try{
 			T respObj = response.readEntity(classType);
 			if(respObj.getStatus().equals("ERROR") || status!=expected){
-				throw new InternalCommunicationException("Dependent servers could not execute request. Error "+status+": "+respObj.getError());
+				throw new InternalCommunicationException("Dependent servers could not execute request. Error "+status+": "+respObj.getError(), throwable);
 			}
 			return classType.cast(respObj);
 		} catch (Exception e){
-			throw new  InternalCommunicationException("Got incorrect response from underlying servers. Got ERROR: "+status);
+			throw new  InternalCommunicationException("Got incorrect response from underlying servers. Got ERROR: "+status, throwable);
 		}
 	}
 }

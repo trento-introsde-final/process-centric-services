@@ -1,18 +1,26 @@
 package introsde.processcentric.model.response;
 
+import javax.xml.ws.WebFault;
+
+@WebFault(name = "UnknownPersonFault")
 public class InternalCommunicationException extends Exception {
 
-	/**
-	 * 
-	 */
+	private InternalCommunicationExceptionBean faultBean;
+	
 	private static final long serialVersionUID = -7573048377611668178L;
 
-	public InternalCommunicationException(){
-		
+	public InternalCommunicationException(String message, InternalCommunicationExceptionBean faultInfo){
+		super(message);
+		faultBean = faultInfo;
 	}
 	
-	public InternalCommunicationException(String message){
-		super(message);
+	public InternalCommunicationException(String message, InternalCommunicationExceptionBean faultInfo, Throwable cause){
+		super(message, cause);
+		faultBean = faultInfo;
 	}
+	
+	public InternalCommunicationExceptionBean getFaultInfo(){
+        return faultBean;
+    }
 	
 }
