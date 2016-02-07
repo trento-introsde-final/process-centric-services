@@ -28,7 +28,7 @@ public interface ProcessCentricServices {
 	
 	@WebMethod(operationName="updateRunInfo")
     @WebResult(name="person") 
-    public UpdateRunResponseContainer updateRunInfo(@WebParam(name="slack_user_id") String slack_user_id, Float distance, Float time, Float calories) throws InternalCommunicationException;
+    public UpdateRunResponseContainer updateRunInfo(@WebParam(name="slack_user_id") String slack_user_id, @WebParam(name="distance") Float distance, @WebParam(name="moving_time") Float time, @WebParam(name="calories") Float calories) throws InternalCommunicationException;
 	
 	@WebMethod(operationName="setGoal")
     @WebResult(name="person") 
