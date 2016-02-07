@@ -6,17 +6,16 @@ import introsde.processcentric.model.internal.GoalStatusResponse;
 import introsde.processcentric.model.internal.MotivationQuoteResponse;
 import introsde.processcentric.model.internal.PrettyPicResponse;
 import introsde.processcentric.model.internal.SlackIdResponse;
-import introsde.processcentric.model.request.Goal;
 import introsde.processcentric.model.request.Run;
 import introsde.processcentric.model.request.User;
 import introsde.processcentric.model.response.GoalStatusResponseContainer;
 import introsde.processcentric.model.response.InternalCommunicationException;
 import introsde.processcentric.model.response.InternalServiceFault;
 import introsde.processcentric.model.response.Message;
+import introsde.processcentric.model.response.SetGoalResponseContainer;
 import introsde.processcentric.model.response.UpdateRunResponseContainer;
 import introsde.processcentric.util.UrlInfo;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -120,6 +119,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 
 	@Override
 	public GoalStatusResponseContainer checkGoalStatus(String slack_user_id) throws InternalCommunicationException {
+		System.out.println(slack_user_id);
 		if(slack_user_id == null || slack_user_id.isEmpty()){
 			return null;
 		}
@@ -131,6 +131,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
 		Builder builder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response res  = builder.get();
+		System.out.println("Call1: "+res.getStatus());
 		SlackIdResponse slackIdResp = parseResponse(res, 200, SlackIdResponse.class);
 		Integer user_id = slackIdResp.getId();
 		
@@ -140,6 +141,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		webTarget = client.target(String.format(URLGoalStatus, businessServicesURL, user_id.toString()));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		res = builder.get();
+		System.out.println("Call2: "+res.getStatus());
 		GoalStatusResponse gStatusResp = parseResponse(res, 200, GoalStatusResponse.class);
 		List<GoalStatusObject> goals = gStatusResp.getGoal_status();
 		
@@ -166,6 +168,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		webTarget = client.target(String.format(URLPictures, storageServicesURL));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		res = builder.get();
+		System.out.println("Call3: "+res.getStatus());
 		PrettyPicResponse picResp = parseResponse(res, 200, PrettyPicResponse.class);
 
 		
@@ -175,6 +178,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		webTarget = client.target(String.format(URLQuotes, storageServicesURL));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		res = builder.get();
+		System.out.println("Call4: "+res.getStatus());
 		MotivationQuoteResponse mQuoteResp = parseResponse(res, 200, MotivationQuoteResponse.class);
 		
 		//build and send response
@@ -203,7 +207,6 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	 *          0 Id of created run
 	 */
 	public UpdateRunResponseContainer updateRunInfo(String slack_user_id, Float distance, Float time, Float calories) throws InternalCommunicationException{
-		UpdateRunResponseContainer response = new UpdateRunResponseContainer();
 		if(slack_user_id == null || slack_user_id.isEmpty() || (distance==null && time == null && calories == null)){
 			//response.setError(-1, "Invalid arguments.");
 			return null;
@@ -279,7 +282,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 			messages.add(new Message("image", picResp.getPicture().url));
 		} else {
 			//############################################
-			// Call 4: Get motivational quote
+			// Call 4.B: Get motivational quote
 			//############################################
 			messages.add(new Message("text", "Congratulations for your effort :D! Here's a little something to keep you going."));
 			webTarget = client.target(String.format(URLQuotes, storageServicesURL));
@@ -297,9 +300,28 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	}
 
 	@Override
-	public void setGoal(String slack_user_id, Goal goal) {
-		// TODO Auto-generated method stub
+	public SetGoalResponseContainer setGoal(String slack_user_id, Float target, String period) {
+		if(slack_user_id == null || slack_user_id.isEmpty() || target == null || period==null){
+			return null;
+		}
 		
+		//############################################
+		// Call 1: Get user id, from slack_user_id
+		//###########################################
+		Client client = ClientBuilder.newClient();
+		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
+		Builder builder = webTarget.request(MediaType.APPLICATION_JSON);
+		Response res  = builder.get();
+		if(res.getStatus() != 200){
+			//response.setError(-2, "Cannot commuincate with ")
+		}
+		SlackIdResponse slackIdResp = res.readEntity(SlackIdResponse.class);
+		if(slackIdResp.getStatus().equals("ERROR")){
+			return null;
+		}
+		Integer user_id = slackIdResp.getId();
+		
+		return new SetGoalResponseContainer();
 	}
 
 	private List<GoalStatusObject> checkNewGoalsMet(List<GoalStatusObject> goalStatus, Run run){

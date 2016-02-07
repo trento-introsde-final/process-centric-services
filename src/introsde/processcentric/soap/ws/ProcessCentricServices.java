@@ -1,9 +1,8 @@
 package introsde.processcentric.soap.ws;
 
-import introsde.processcentric.model.request.Goal;
-import introsde.processcentric.model.request.Run;
 import introsde.processcentric.model.response.GoalStatusResponseContainer;
 import introsde.processcentric.model.response.InternalCommunicationException;
+import introsde.processcentric.model.response.SetGoalResponseContainer;
 import introsde.processcentric.model.response.UpdateRunResponseContainer;
 
 import javax.jws.WebMethod;
@@ -32,7 +31,7 @@ public interface ProcessCentricServices {
 	
 	@WebMethod(operationName="setGoal")
     @WebResult(name="person") 
-    public void setGoal(@WebParam(name="slack_user_id") String slack_user_id, Goal goal);
+    public SetGoalResponseContainer setGoal(@WebParam(name="slack_user_id") String slack_user_id, @WebParam(name="target") Float target, @WebParam(name="period") String period);
 	
 	
 }
