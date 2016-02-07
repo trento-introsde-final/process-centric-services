@@ -47,6 +47,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	String URLSlackUser = "%s/user-id/%s";
 	String URLPictures = "%s/pretty-pic";
 	String URLQuotes = "%s/motivation-quote";
+	String URLGoals = "%s/users/%s/goals/%s";
 	
 	public ProcessCentricImpl() {
     	UrlInfo u = new UrlInfo();
@@ -303,8 +304,8 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	}
 
 	@Override
-	public SetGoalResponseContainer setGoal(String slack_user_id, Float target, String period) {
-		if(slack_user_id == null || slack_user_id.isEmpty() || target == null || period==null){
+	public SetGoalResponseContainer setGoal(String slack_user_id, String goal_type, Float target, String period) {
+		if(slack_user_id == null || slack_user_id.isEmpty() || goal_type == null || target == null || period==null){
 			return null;
 		}
 		
@@ -324,7 +325,23 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		}
 		Integer user_id = slackIdResp.getId();
 		
-		return new SetGoalResponseContainer();
+		//############################################
+		// Call 2: Put goal
+		//###########################################
+		client = ClientBuilder.newClient();
+		webTarget = client.target(String.format(URLGoals, storageServicesURL, slack_user_id, goal_type));
+		builder = webTarget.request(MediaType.APPLICATION_JSON);
+		res = builder.get();
+		if(res.getStatus() != 200){
+			
+		}
+		BasicResponse bResp = res.readEntity(BasicResponse.class);
+		
+		List<Message> messages = new ArrayList<Message>();
+		messages.add(new Message("text", "Goal saved! That's great. Keep working and soon "+target+" will seem like a walk in the park."));
+		SetGoalResponseContainer resp = new SetGoalResponseContainer();
+		resp.setMessages(messages);
+		return resp;
 	}
 
 	private List<GoalStatusObject> checkNewGoalsMet(List<GoalStatusObject> goalStatus, Run run){

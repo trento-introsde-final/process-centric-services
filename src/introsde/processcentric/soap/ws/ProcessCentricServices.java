@@ -31,7 +31,7 @@ public interface ProcessCentricServices {
 	
 	@WebMethod(operationName="setGoal")
     @WebResult(name="person") 
-    public SetGoalResponseContainer setGoal(@WebParam(name="slack_user_id") String slack_user_id, @WebParam(name="target") Float target, @WebParam(name="period") String period);
+    public SetGoalResponseContainer setGoal(@WebParam(name="slack_user_id") String slack_user_id, @WebParam(name="goal-type") String goal_type, @WebParam(name="target") Float target, @WebParam(name="period") String period);
 	
 	
 }
