@@ -159,9 +159,11 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 			message = "You haven't set any goals yet. We are sad. Maybe this can get you going?";
 		} else if (totGoals == metGoals){
 			message = "You've met all your goals! You are amazing. Keep up the good work. Here's your reward.";
-		} else {
+		} else if (metGoals > 0){
 			message = String.format("You've already achieved %d out of %d goals. There's no stopping you now :)."+
 					"\nIf you continue like this, soon you'll be writing your own motivational quotes.", metGoals, totGoals);
+		} else {
+			message = "You haven't met any goals yet. But keep working and soon you'll be enjoying the benefits :D.";
 		}
 		
 		//#############################################
