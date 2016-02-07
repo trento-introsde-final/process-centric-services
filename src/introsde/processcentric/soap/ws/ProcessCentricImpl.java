@@ -201,12 +201,16 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	 * 		   -5 Could not save run
 	 *          0 Id of created run
 	 */
-	public UpdateRunResponseContainer updateRunInfo(String slack_user_id, Run run) throws InternalCommunicationException{
+	public UpdateRunResponseContainer updateRunInfo(String slack_user_id, Float distance, Float time, Float calories) throws InternalCommunicationException{
 		UpdateRunResponseContainer response = new UpdateRunResponseContainer();
-		if(slack_user_id == null || slack_user_id.isEmpty() || run == null){
+		if(slack_user_id == null || slack_user_id.isEmpty() || (distance==null && time == null && calories == null)){
 			//response.setError(-1, "Invalid arguments.");
 			return null;
 		}
+		Run run = new Run();
+		run.setCalories(calories);
+		run.setDistance(distance);
+		run.setMoving_time(time.intValue());
 		
 		//############################################
 		// Call 1: Get user id, from slack_user_id
