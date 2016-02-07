@@ -370,16 +370,19 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		throwable.setFaultCode("1233");
 		throwable.setFaultString("Could not contact underlying servers.");
 		if(status == 500 || status == 503){
-			throw new InternalCommunicationException("Could not contact underlying servers. Got ERROR: "+status, throwable);
+			throw new InternalCommunicationException("Could not contact underlying servers. Got Response: "+status, throwable);
 		}
+		T respObj;
 		try{
-			T respObj = response.readEntity(classType);
-			if(respObj.getStatus().equals("ERROR") || status!=expected){
-				throw new InternalCommunicationException("Dependent servers could not execute request. Error "+status+": "+respObj.getError(), throwable);
-			}
-			return classType.cast(respObj);
+			respObj = response.readEntity(classType);
 		} catch (Exception e){
 			throw new  InternalCommunicationException("Got incorrect response from underlying servers. Got ERROR: "+status, throwable);
 		}
+		if(respObj == null || respObj.getStatus().equals("ERROR") || status!=expected){
+			String message = "Dependent servers could not execute request. Status "+status+": "+respObj.getError();
+			throw new InternalCommunicationException(message, throwable);
+		}
+		return classType.cast(respObj);
+	
 	}
 }
