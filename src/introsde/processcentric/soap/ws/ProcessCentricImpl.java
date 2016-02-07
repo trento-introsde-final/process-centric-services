@@ -6,6 +6,7 @@ import introsde.processcentric.model.internal.GoalStatusResponse;
 import introsde.processcentric.model.internal.MotivationQuoteResponse;
 import introsde.processcentric.model.internal.PrettyPicResponse;
 import introsde.processcentric.model.internal.SlackIdResponse;
+import introsde.processcentric.model.request.Goal;
 import introsde.processcentric.model.request.Run;
 import introsde.processcentric.model.request.User;
 import introsde.processcentric.model.response.GoalStatusResponseContainer;
@@ -122,7 +123,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	public GoalStatusResponseContainer checkGoalStatus(String slack_user_id) throws InternalCommunicationException {
 		System.out.println(slack_user_id);
 		if(slack_user_id == null || slack_user_id.isEmpty()){
-			return null;
+			throw new InternalCommunicationException("Invalid arguments. Cannot be empty.");
 		}
 		
 		//############################################
@@ -132,7 +133,6 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
 		Builder builder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response res  = builder.get();
-		System.out.println("Call1: "+res.getStatus());
 		SlackIdResponse slackIdResp = parseResponse(res, 200, SlackIdResponse.class);
 		Integer user_id = slackIdResp.getId();
 		
@@ -142,10 +142,9 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		webTarget = client.target(String.format(URLGoalStatus, businessServicesURL, user_id.toString()));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		res = builder.get();
-		System.out.println("Call2: "+res.getStatus());
 		GoalStatusResponse gStatusResp = parseResponse(res, 200, GoalStatusResponse.class);
 		List<GoalStatusObject> goals = gStatusResp.getGoal_status();
-		System.out.println("Number of goals: "+goals.size());
+		
 		//Count how many goals are met
 		int metGoals = 0;
 		int totGoals = goals.size();
@@ -154,11 +153,12 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 			if(g.getGoal_met())
 				metGoals++;
 		}
-		System.out.println("Met goals: "+metGoals);
+
+		//set encouraging message
 		if(totGoals == 0){
 			message = "You haven't set any goals yet. We are sad. Maybe this can get you going?";
 		} else if (totGoals == metGoals){
-			message = "You've set all your goals! You are amazing. Keep up the good work. Here's your reward.";
+			message = "You've met all your goals! You are amazing. Keep up the good work. Here's your reward.";
 		} else {
 			message = String.format("You've already achieved %d out of %d goals. There's no stopping you now :)."+
 					"\nIf you continue like this, soon you'll be writing your own motivational quotes.", metGoals, totGoals);
@@ -170,7 +170,6 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		webTarget = client.target(String.format(URLPictures, storageServicesURL));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		res = builder.get();
-		System.out.println("Call3: "+res.getStatus());
 		PrettyPicResponse picResp = parseResponse(res, 200, PrettyPicResponse.class);
 
 		
@@ -180,7 +179,6 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		webTarget = client.target(String.format(URLQuotes, storageServicesURL));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		res = builder.get();
-		System.out.println("Call4: "+res.getStatus());
 		MotivationQuoteResponse mQuoteResp = parseResponse(res, 200, MotivationQuoteResponse.class);
 		
 		//build and send response
@@ -194,7 +192,6 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		GoalStatusResponseContainer resp = new GoalStatusResponseContainer();
 		resp.setGoalStatusList(goals);
 		resp.setMessages(messages);
-		System.out.println(String.format("%d messages, %d goals", resp.getMessages().size(), resp.getGoalStatusList().size()));
 		return resp;
 	}
 
@@ -212,8 +209,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	 */
 	public UpdateRunResponseContainer updateRunInfo(String slack_user_id, Float distance, Float time, Float calories) throws InternalCommunicationException{
 		if(slack_user_id == null || slack_user_id.isEmpty() || (distance==null && time == null && calories == null)){
-			//response.setError(-1, "Invalid arguments.");
-			return null;
+			throw new InternalCommunicationException("Invalid arguments. Cannot be empty.");
 		}
 		Run run = new Run();
 		run.setCalories(calories);
@@ -228,13 +224,8 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
 		Builder builder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response res  = builder.get();
-		if(res.getStatus() != 200){
-			//response.setError(-2, "Cannot commuincate with ")
-		}
-		SlackIdResponse slackIdResp = res.readEntity(SlackIdResponse.class);
-		if(slackIdResp.getStatus().equals("ERROR")){
-			return null;
-		}
+		SlackIdResponse slackIdResp = parseResponse(res, 200, SlackIdResponse.class);
+		
 		Integer user_id = slackIdResp.getId();
 		
 		//############################################
@@ -243,13 +234,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		webTarget = client.target(String.format(URLGoalStatus, businessServicesURL, user_id.toString()));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		res = builder.get();
-		if(res.getStatus() != 200){
-			return null;
-		}
-		GoalStatusResponse gStatusResp = res.readEntity(GoalStatusResponse.class);
-		if(gStatusResp.getStatus().equals("ERROR")){
-			return null;
-		}
+		GoalStatusResponse gStatusResp = parseResponse(res, 200, GoalStatusResponse.class);
 		List<GoalStatusObject> goals = gStatusResp.getGoal_status();
 
 		//############################################
@@ -275,7 +260,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 						+newlyMetGoals.get(0).getCount()+" "
 						+newlyMetGoals.get(0).getUnits()+"\n";
 			}
-			messages.add(new Message("text", "Enjoy this nice pic."));
+			messages.add(new Message("text", message+"Enjoy this nice pic."));
 			//############################################
 			// Call 4.A: Get rewards: Pretty pic
 			//###########################################
@@ -304,9 +289,9 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	}
 
 	@Override
-	public SetGoalResponseContainer setGoal(String slack_user_id, String goal_type, Float target, String period) {
+	public SetGoalResponseContainer setGoal(String slack_user_id, String goal_type, Float target, String period) throws InternalCommunicationException{
 		if(slack_user_id == null || slack_user_id.isEmpty() || goal_type == null || target == null || period==null){
-			return null;
+			throw new InternalCommunicationException("Invalid arguments.");
 		}
 		
 		//############################################
@@ -316,26 +301,21 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
 		Builder builder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response res  = builder.get();
-		if(res.getStatus() != 200){
-			//response.setError(-2, "Cannot commuincate with ")
-		}
-		SlackIdResponse slackIdResp = res.readEntity(SlackIdResponse.class);
-		if(slackIdResp.getStatus().equals("ERROR")){
-			return null;
-		}
+		SlackIdResponse slackIdResp = parseResponse(res, 200, SlackIdResponse.class);
 		Integer user_id = slackIdResp.getId();
 		
 		//############################################
 		// Call 2: Put goal
 		//###########################################
 		client = ClientBuilder.newClient();
-		webTarget = client.target(String.format(URLGoals, storageServicesURL, slack_user_id, goal_type));
+		webTarget = client.target(String.format(URLGoals, storageServicesURL, user_id, goal_type));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
-		res = builder.get();
-		if(res.getStatus() != 200){
-			
-		}
-		BasicResponse bResp = res.readEntity(BasicResponse.class);
+		
+		Goal g = new Goal();
+		g.setPeriod(period);
+		g.setTarget(target);
+		res = builder.put(Entity.json((g)));
+		parseResponse(res, 200, BasicResponse.class);
 		
 		List<Message> messages = new ArrayList<Message>();
 		messages.add(new Message("text", "Goal saved! That's great. Keep working and soon "+target+" will seem like a walk in the park."));
