@@ -1,9 +1,9 @@
-package introsde.processcentric.model.outgoing;
+package introsde.processcentric.model.request;
 
 import java.sql.Timestamp;
 
 
-public class ReqRun {
+public class Run {
 
 	private Timestamp start_date;
 	
@@ -19,7 +19,7 @@ public class ReqRun {
 	
 	private float avg_speed;
 
-	public ReqRun(){
+	public Run(){
 		
 	}
 

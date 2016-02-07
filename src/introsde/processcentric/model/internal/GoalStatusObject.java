@@ -1,8 +1,7 @@
-package introsde.processcentric.model.incoming;
+package introsde.processcentric.model.internal;
 
-import java.sql.Timestamp;
 
-public class GoalStatus {
+public class GoalStatusObject {
 
 	private String type;
 	
@@ -10,19 +9,19 @@ public class GoalStatus {
 	
 	private String units;
 	
-	private Float target;
+	private float target;
 	
 	private String period;
 	
-	private Timestamp period_start;
+	private Long period_start;
 	
-	private Timestamp period_end;
+	private Long period_end;
 	
 	private Boolean goal_met;
 	
-	private Float count;
+	private float count;
 	
-	public GoalStatus(){
+	public GoalStatusObject(){
 		
 	}
 
@@ -38,7 +37,7 @@ public class GoalStatus {
 		return units;
 	}
 
-	public Float getTarget() {
+	public float getTarget() {
 		return target;
 	}
 
@@ -46,11 +45,11 @@ public class GoalStatus {
 		return period;
 	}
 
-	public Timestamp getPeriod_start() {
+	public Long getPeriod_start() {
 		return period_start;
 	}
 
-	public Timestamp getPeriod_end() {
+	public Long getPeriod_end() {
 		return period_end;
 	}
 
@@ -58,7 +57,7 @@ public class GoalStatus {
 		return goal_met;
 	}
 
-	public Float getCount() {
+	public float getCount() {
 		return count;
 	}
 
@@ -74,7 +73,7 @@ public class GoalStatus {
 		this.units = units;
 	}
 
-	public void setTarget(Float target) {
+	public void setTarget(float target) {
 		this.target = target;
 	}
 
@@ -82,11 +81,11 @@ public class GoalStatus {
 		this.period = period;
 	}
 
-	public void setPeriod_start(Timestamp period_start) {
+	public void setPeriod_start(Long period_start) {
 		this.period_start = period_start;
 	}
 
-	public void setPeriod_end(Timestamp period_end) {
+	public void setPeriod_end(Long period_end) {
 		this.period_end = period_end;
 	}
 
@@ -94,10 +93,9 @@ public class GoalStatus {
 		this.goal_met = goal_met;
 	}
 
-	public void setCount(Float count) {
+	public void setCount(float count) {
 		this.count = count;
 	}
 	
+	
 }
-
-

@@ -1,10 +1,9 @@
 package introsde.processcentric.soap.ws;
 
-import introsde.processcentric.model.incoming.Goal;
-import introsde.processcentric.model.incoming.GoalStatus;
-import introsde.processcentric.model.incoming.Run;
-
-import java.util.List;
+import introsde.processcentric.model.request.Goal;
+import introsde.processcentric.model.request.Run;
+import introsde.processcentric.model.response.GoalStatusResponseContainer;
+import introsde.processcentric.model.response.InternalCommunicationException;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -24,7 +23,7 @@ public interface ProcessCentricServices {
 	
 	@WebMethod(operationName="checkGoalStatus")
     @WebResult(name="goal") 
-    public List<GoalStatus> checkGoalStatus(@WebParam(name="slack_user_id") String slack_user_id);
+    public GoalStatusResponseContainer checkGoalStatus(@WebParam(name="slack_user_id") String slack_user_id) throws InternalCommunicationException;
 	
 	@WebMethod(operationName="updateRunInfo")
     @WebResult(name="person") 

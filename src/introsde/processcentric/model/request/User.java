@@ -1,7 +1,7 @@
-package introsde.processcentric.model.outgoing;
+package introsde.processcentric.model.request;
 
 
-public class ReqUser {
+public class User {
 
 	private String slack_user_id;
 	
@@ -11,7 +11,7 @@ public class ReqUser {
 	
 	private String email;
 	
-	public ReqUser(){
+	public User(){
 		
 	}
 

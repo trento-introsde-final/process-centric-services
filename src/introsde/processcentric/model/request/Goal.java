@@ -1,13 +1,13 @@
-package introsde.processcentric.model.outgoing;
+package introsde.processcentric.model.request;
 
 
-public class ReqGoal {
+public class Goal {
 
 	private Float target;
 	
 	private String period;
 	
-	public ReqGoal(){
+	public Goal(){
 		
 	}
 
