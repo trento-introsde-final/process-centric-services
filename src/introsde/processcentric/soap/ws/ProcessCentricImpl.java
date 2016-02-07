@@ -352,7 +352,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 					current = run.getAvg_speed();
 					break;
 				}
-				if(current > missing){
+				if(current >= missing){
 					g.setCount(g.getCount()+current);
 					newlyMetGoals.add(g);
 				}
