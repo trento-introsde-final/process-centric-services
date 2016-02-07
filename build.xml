@@ -103,7 +103,7 @@
         </target>
     	<target name="run">
             <echo message="app start introsde.processcentric.soap.endpoint.ProcessCentricPublisher in ${build.dir}" />
-            <java classname="introsde.processcentric.soap.endpoint.IntroSDEPublisher" classpath="${build.dir}" fork="true">
+            <java classname="introsde.processcentric.soap.endpoint..ProcessCentricPublisher" classpath="${build.dir}" fork="true">
                 <arg value="$JAVA_OPTS  -cp" />
                 <classpath>
                     <path location="build" />
