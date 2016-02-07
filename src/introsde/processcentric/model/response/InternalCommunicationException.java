@@ -2,7 +2,7 @@ package introsde.processcentric.model.response;
 
 import javax.xml.ws.WebFault;
 
-@WebFault(name = "UnknownPersonFault")
+@WebFault(name = "InternalCommunicationFault")
 public class InternalCommunicationException extends Exception {
 
 	private InternalCommunicationExceptionBean faultBean;
