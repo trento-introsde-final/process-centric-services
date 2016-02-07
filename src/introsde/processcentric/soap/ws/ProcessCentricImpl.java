@@ -16,9 +16,10 @@ import introsde.processcentric.model.response.Message;
 import introsde.processcentric.model.response.UpdateRunResponseContainer;
 import introsde.processcentric.util.UrlInfo;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import javax.jws.WebService;
 import javax.ws.rs.client.Client;
@@ -211,6 +212,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		run.setCalories(calories);
 		run.setDistance(distance);
 		run.setMoving_time(time.intValue());
+		run.setStart_date((new Date()).getTime());
 		
 		//############################################
 		// Call 1: Get user id, from slack_user_id
@@ -246,7 +248,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		//############################################
 		// Call 3: Save run
 		//###########################################
-		webTarget = client.target(String.format(URLGoalStatus, storageServicesURL, user_id.toString()));
+		webTarget = client.target(String.format(URLRuns, storageServicesURL, user_id.toString()));
 		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		res = builder.post(Entity.json(run));
 		if(res.getStatus() != 201){
@@ -258,7 +260,15 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		ArrayList<Message> messages = new ArrayList<Message>();
 		
 		if(!newlyMetGoals.isEmpty()){
-			messages.add(new Message("text", "Congratulations, you've achieved agoal."));
+			String message = "Congratulations! ";
+			for(int i=0; i<newlyMetGoals.size(); i++){
+				message += "You've achieved your "
+						+newlyMetGoals.get(0).getPeriod()+" "
+						+newlyMetGoals.get(0).getType()+" goal. "
+						+newlyMetGoals.get(0).getCount()+" "
+						+newlyMetGoals.get(0).getUnits()+"\n";
+			}
+			messages.add(new Message("text", "Enjoy this nice pic."));
 			//############################################
 			// Call 4.A: Get rewards: Pretty pic
 			//###########################################
@@ -271,6 +281,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 			//############################################
 			// Call 4: Get motivational quote
 			//############################################
+			messages.add(new Message("text", "Congratulations for your effort :D! Here's a little something to keep you going."));
 			webTarget = client.target(String.format(URLQuotes, storageServicesURL));
 			builder = webTarget.request(MediaType.APPLICATION_JSON);
 			res = builder.get();
@@ -316,11 +327,9 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 				case "avg_speed":
 					current = run.getAvg_speed();
 					break;
-				case "steps":
-					current = run.getSteps();
-					break;
 				}
 				if(current > missing){
+					g.setCount(g.getCount()+current);
 					newlyMetGoals.add(g);
 				}
 			}
