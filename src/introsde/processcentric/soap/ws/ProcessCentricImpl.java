@@ -129,6 +129,7 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 	 * @return -1 Bad Params
 	 * 		   -2 Error in some called server
 	 * 		   -3 No error, but got bad response
+	 * 		   -4 Already registered
 	 *         >0 Id of created user
 	 */
 	@Override
@@ -136,16 +137,32 @@ public class ProcessCentricImpl implements ProcessCentricServices {
 		if(slack_user_id == null || slack_user_id.isEmpty()){
 			return -1;
 		}
+		
+		//############################################
+		// Step 1: Check if already registered	
+		//###########################################
 		Client client = ClientBuilder.newClient();
-		WebTarget webTarget = client.target(String.format(URLUsers, storageServicesURL, ""));
+		WebTarget webTarget = client.target(String.format(URLSlackUser, businessServicesURL, slack_user_id));
 		Builder builder = webTarget.request(MediaType.APPLICATION_JSON);
+		Response res  = builder.get();
+		SlackIdResponse slackIdResp = res.readEntity(SlackIdResponse.class);
+		if(!slackIdResp.getStatus().equals("ERROR") && slackIdResp.getId() != null){
+			return -4;
+		}
+		
+		//############################################
+		// Step 2: Register user
+		//###########################################		
+		client = ClientBuilder.newClient();
+		webTarget = client.target(String.format(URLUsers, storageServicesURL, ""));
+		builder = webTarget.request(MediaType.APPLICATION_JSON);
 		
 		//Build request object
 		User user = new User();
 		user.setSlack_user_id(slack_user_id);
 		user.setFirstname(name);
 		
-		Response res = builder.post(Entity.json(user));
+		res = builder.post(Entity.json(user));
 		
 		String pp = res.readEntity(String.class);
 		
