@@ -7,10 +7,10 @@ import javax.xml.ws.Endpoint;
 
 import introsde.processcentric.soap.ws.ProcessCentricImpl;
 
-public class IntroSDEPublisher {
+public class ProcessCentricPublisher {
 	public static String SERVER_URL = "http://localhost";
     public static String PORT = "6902";
-    public static String BASE_URL = "/ws/introsdefinal";
+    public static String BASE_URL = "/processCentricServices";
 
     public static String getEndpointURL() throws UnknownHostException {
 
@@ -31,7 +31,7 @@ public class IntroSDEPublisher {
 
     public static void main(String[] args) throws UnknownHostException {
     	String endpointUrl = getEndpointURL();
-    	System.out.println("Starting ProcessCentric Service...");
+    	System.out.println("Starting Process Centric Services...");
     	System.out.println("--> Published at = " + endpointUrl);
     	Endpoint.publish(endpointUrl, new ProcessCentricImpl());
     }
