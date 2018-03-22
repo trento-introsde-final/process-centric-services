@@ -1,10 +1,7 @@
-#FitBot - IntroSDE Final Project - UNITN
+# FitBot - IntroSDE Final Project - UNITN
 
-##Process Centric Services
+## Process Centric Services
 
-Please check the full [project documentation] [2].
+Please check the full [project documentation](https://process-centric-services.herokuapp.com/).
 
-Deployed on [https://process-centric-services.herokuapp.com/] [1]
-
-[1]: https://process-centric-services.herokuapp.com/
-[2]: https://github.com/trento-introsde-final/documentation
+Deployed on [https://process-centric-services.herokuapp.com/](https://github.com/trento-introsde-final/documentation)
